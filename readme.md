@@ -9,7 +9,7 @@ Currently, Guinea, Sierra Leone and Liberia contain p-codes, though there are ga
 * Sierra Leone - Level 0, 1 and 2
 * Liberia - Level 0 and 1
 
-The underlying boundary dataset is [GADM](www.gadm.org), 2014 release.
+The underlying boundary dataset is [GADM](http://www.gadm.org), 2014 release.
 
 
 
