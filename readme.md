@@ -1,11 +1,11 @@
 PCoder
 ========================
 
-Pcoder is a set of web services that allow for spatial querying of administrative boundaries tagged with pcodes.
+Pcoder is a set of web services that allow for spatial querying of administrative boundaries tagged with [p-codes](https://sites.google.com/site/ochaimwiki/geodata-preparation-manual/p-code-guidelines).
 
-Currently, Guinea, Sierra Leone and Liberia contain pcodes, though there are gaps in coding depending on the country.
+Currently, Guinea, Sierra Leone and Liberia contain p-codes, though there are gaps in coding depending on the country.
 
-* Guinea - Level 0,1 and 2 pcodes
+* Guinea - Level 0,1 and 2
 * Sierra Leone - Level 0, 1 and 2
 * Liberia - Level 0 and 1
 
