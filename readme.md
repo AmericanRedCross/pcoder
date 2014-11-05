@@ -17,7 +17,12 @@ The underlying boundary dataset is [GADM](http://www.gadm.org), 2014 release.
 
 There are 3 services:
 
-###GetPCodeStackByXY
+1. [GetPCodeStackByXY](#GetPCodeStackByXY)
+2. [GetPCodeStackByXYList](#GetPCodeStackByXYList)
+3. [UploadCSVToPCode](#UploadCSVToPCode)
+
+
+###<a name="GetPCodeStackByXY"></a>GetPCodeStackByXY
 This service expects a single location to be passed in, and will return the 'stack' of administrative boundaries (including pcodes where available) that touch that location.
 
 ####Parameters
@@ -85,7 +90,7 @@ Using jQuery, here is an example of POSTing to this endpoint:
 
 
 
-###GetPCodeStackByXYList
+###<a name="GetPCodeStackByXYList"></a>GetPCodeStackByXYList
 This service expects a delimited list of locations to be passed in, and will return the 'stack' of administrative boundaries (including pcodes where available) that touch those locations.
 
 ####Parameters
@@ -236,7 +241,7 @@ Using jQuery, here is an example of POSTing to this endpoint:
 
 
 
-###UploadCSVToPCode
+###<a name="UploadCSVToPCode"></a>UploadCSVToPCode
 
 POST a Comma Separated Value (.csv) file containing x and y coordinates to this service, and it will return the 'stack' of administrative boundaries (including pcodes where available) that touch locations in the csv.
 
