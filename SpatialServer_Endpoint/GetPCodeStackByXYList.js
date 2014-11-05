@@ -6,7 +6,7 @@ var flow = require('flow');
 var pg = require('pg');
 var common = require("../../../common");
 
-//Takes in a POINT (X Y) and returns JSON object containing the intersected boundaries along with pcodes if applicable.
+//Takes in a POINT (X Y) List and returns JSON object containing the intersected boundaries along with pcodes if applicable.
 //Arguments are:
 //1. X (Longitude)
 //2. Y (Latitude)
@@ -17,13 +17,12 @@ var operation = {};
 
 /* METADATA */
 
-operation.name = "GetPCodeStackByXY";
-operation.description = "Takes an X and Y coordinate, returns JSON object with intersected GADM boundaries with any pcodes that are available.";
+operation.name = "GetPCodeStackByXYList";
+operation.description = "Takes an X,Y coordinate list in the form X Y,X Y,X Y,X Y,X Y, returns JSON object with intersected GADM boundaries with any pcodes that are available. Example coords: -11.648737 8.280284,-12.077204 9.539293,-10.637995 8.236794";
 operation.inputs = {};
 
 
-operation.inputs["x"] = { value: "", required: true, help: "x coordinate (longitude), decimal degrees" };
-operation.inputs["y"] = { value: "", required: true, help: "y coordinate (latitude), decimal degrees" };
+operation.inputs["coords"] = { value: "", required: true, help: "coordinate list X Y,X Y,X Y,X Y,X Y, decimal degrees" };
 operation.inputs["returnGeometry"] = { value: "", required: false, default_value: false, help: "true or false"}; //default value = false
 
 operation.execute = flow.define(
@@ -33,15 +32,14 @@ operation.execute = flow.define(
 
     //This contains Geom, but doesn't output in the HTML correctly.
     //var query = "select name0,guid0,ST_AsGeoJSON(geom0) as geom0,pcode0,name1,guid1,ST_AsGeoJSON(geom1) as geom1,pcode1,name2,guid2,ST_AsGeoJSON(geom2) as geom2,pcode2,name3,guid3,ST_AsGeoJSON(geom3) as geom3,pcode3,name4,guid4,ST_AsGeoJSON(geom4) as geom4,pcode4,name5,guid5,ST_AsGeoJSON(geom5) as geom5,pcode5  from gadmrollup where ST_Intersects(ST_GeomFromText('POINT({{x}} {{y}})', 4326), geom3);";
-    var query = "select name0,guid0,pcode0,name1,guid1,pcode1,name2,guid2,pcode2,name3,guid3,pcode3,name4,guid4,pcode4,name5,guid5,pcode5 {{geometry}} from gadmrollup where ST_Intersects(ST_GeomFromText('POINT({{x}} {{y}})', 4326), geom3);";
+    var query = "select name0,guid0,pcode0,name1,guid1,pcode1,name2,guid2,pcode2,name3,guid3,pcode3,name4,guid4,pcode4,name5,guid5,pcode5 {{geometry}} from gadmrollup where ST_Intersects(ST_GeomFromText('MULTIPOINT({{coords}})', 4326), geom3);";
 
 
     this.args = args;
     this.callback = callback;
     //Step 1
 
-    var x = operation.inputs["x"].value = args.x;
-    var y = operation.inputs["y"].value = args.y;
+    var coords = operation.inputs["coords"].value = args.coords;
     var returnGeometry = operation.inputs["returnGeometry"].value = (args.returnGeometry == 'true');
 
     //See if inputs are set. Incoming arguments should contain the same properties as the input parameters.
@@ -58,7 +56,7 @@ operation.execute = flow.define(
         operation.geom_columns = [];
       }
 
-      var sql = { text: query.replace("{{x}}", x).replace("{{y}}", y), values: []};
+      var sql = { text: query.replace("{{coords}}", coords), values: []};
 
       common.executePgQuery(sql, this);//Flow to next function when done.
 

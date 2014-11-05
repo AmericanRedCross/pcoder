@@ -1,8 +1,5 @@
---This creates a rollup table for countries that have pcodes.
---pcodes may or may not exist for levels beneath country (level0), so they are LEFT OUTER Joined
-
 DROP TABLE IF EXISTS gadmrollup;
-SELECT
+SELECT 
 gadm0.name_0 as name0, gadm0.guid as guid0, gadm0.geom_simplify_med as geom0, gadm0.pcode as pcode0,
 gadm1.name_1 as name1, gadm1.guid as guid1, gadm1.geom_simplify_med as geom1, gadm1.pcode as pcode1,
 gadm2.name_2 as name2, gadm2.guid as guid2, gadm2.geom_simplify_med as geom2, gadm2.pcode as pcode2,
@@ -38,3 +35,6 @@ CREATE INDEX ON gadmrollup (pcode3);
 CREATE INDEX ON gadmrollup (pcode4);
 CREATE INDEX ON gadmrollup (pcode5);
 CREATE INDEX ON gadmrollup (pcode0);
+
+--Test
+select name0,guid0,ST_AsGeoJSON(geom0) as geom0,pcode0,name1,guid1,ST_AsGeoJSON(geom1) as geom1,pcode1,name2,guid2,ST_AsGeoJSON(geom2) as geom2,pcode2,name3,guid3,ST_AsGeoJSON(geom3) as geom3,pcode3,name4,guid4,ST_AsGeoJSON(geom4) as geom4,pcode4,name5,guid5,ST_AsGeoJSON(geom5) as geom5,pcode5 from gadmrollup where ST_Intersects(ST_GeomFromText('POINT(-9.5847 6.9444)', 4326), geom3);
