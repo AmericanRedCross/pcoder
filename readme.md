@@ -247,8 +247,8 @@ Using jQuery, here is an example of POSTing to this endpoint:
 ###<a name="UploadCSVToPCode"></a>UploadCSVToPCode
 
 This endpoint accepts a csv upload and serves two purposes:
-1) Look up pcodes for given X and Y coordinate columns, OR
-2) Look up boundary or centroid data given a pcode column
+1. Look up pcodes for given X and Y coordinate columns, OR
+2. Look up boundary or centroid data given a pcode column
 
 
 
@@ -256,8 +256,8 @@ This endpoint accepts a csv upload and serves two purposes:
 POST a Comma Separated Value (.csv) file containing x and y coordinates to this service, and it will return the corresponding administrative boundary (including pcodes where available) that touch locations in the csv.
 Once uploaded, the service searches for the following columns:
 
-1) Latitude - Use either y, lat, latitude or ycenter as the column name.
-2) Longitude - Use either x, lng, lon, long, longitude, or xcenter as the column name.
+1. Latitude - Use either y, lat, latitude or ycenter as the column name.
+2. Longitude - Use either x, lng, lon, long, longitude, or xcenter as the column name.
 
 Other columns pass through unaffected, and are included in the output.
 
@@ -298,7 +298,7 @@ Response:
 POST a Comma Separated Value (.csv) file containing p-codes to this service, and it will return the corresponding boundary geometry or boundary geometry centroid in the csv.
 Once uploaded, the service searches for the following columns:
 
-1) p-code - Use either pcode, pcodes, p-code or p-codes as the column name.
+1. p-code - Use either pcode, pcodes, p-code or p-codes as the column name.
 
 Other columns pass through unaffected, and are included in the output.
 
