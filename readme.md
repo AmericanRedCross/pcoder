@@ -295,7 +295,7 @@ Response:
 
 
 #####p-code Mode
-POST a Comma Separated Value (.csv) file containing p-codes to this service, and it will return the corresponding boundary geometry or boundary geometry centroid in the csv.
+POST a Comma Separated Value (.csv) file containing p-codes to this service, and it will return the corresponding boundary geometry AND boundary geometry centroid in the csv.
 Once uploaded, the service searches for the following columns:
 
 1. p-code - Use either pcode, pcodes, p-code or p-codes as the column name.
