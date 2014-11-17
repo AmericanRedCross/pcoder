@@ -17,11 +17,12 @@ The PCoder web services are custom geoprocessing endpoints used in conjunction w
 
 # Services
 
-There are 3 services:
+There are 4 services:
 
 1. [GetPCodeStackByXY](#GetPCodeStackByXY)
 2. [GetPCodeStackByXYList](#GetPCodeStackByXYList)
 3. [UploadCSVToPCode](#UploadCSVToPCode)
+4. [GetPCodeStackByPCodeList](#GetPCodeStackByPCodeList)
 
 
 ###<a name="GetPCodeStackByXY"></a>GetPCodeStackByXY
@@ -245,22 +246,31 @@ Using jQuery, here is an example of POSTing to this endpoint:
 
 ###<a name="UploadCSVToPCode"></a>UploadCSVToPCode
 
-POST a Comma Separated Value (.csv) file containing x and y coordinates to this service, and it will return the 'stack' of administrative boundaries (including pcodes where available) that touch locations in the csv.
+This endpoint accepts a csv upload and serves two purposes:
+1) Look up pcodes for given X and Y coordinate columns, OR
+2) Look up boundary or centroid data given a pcode column
 
-Currently, it is required that the csv contain an `x` and `y` column that contain longitude and latitude values, respectively.
+
+
+#####X Y Mode
+POST a Comma Separated Value (.csv) file containing x and y coordinates to this service, and it will return the corresponding administrative boundary (including pcodes where available) that touch locations in the csv.
+Once uploaded, the service searches for the following columns:
+
+1) Latitude - Use either y, lat, latitude or ycenter as the column name.
+2) Longitude - Use either x, lng, lon, long, longitude, or xcenter as the column name.
 
 Other columns pass through unaffected, and are included in the output.
 
 ####Parameters
 - **csvupload** - required. The CSV file being posted should be passed using this parameter name
 - **format** - required. `geojson` or `csv`
-- **name** - required. "uploadcsvtopCode".  All endpoints require the name of the operation to be specified.
+- **name** - required. "uploadcsvtopcode".  All endpoints require the name of the operation to be specified.
 
 ####POST Example
 
 ######Pass in list csv from HTML file picker, output format = csv
 
-[Example Input CSV](https://github.com/AmericanRedCross/pcoder/tree/master/DocSupport/example_csv/input.csv)
+[Example Input CSV](https://github.com/AmericanRedCross/pcoder/tree/master/DocSupport/example_csv/inputxy.csv)
 
 
     <html>
@@ -281,4 +291,170 @@ Other columns pass through unaffected, and are included in the output.
 
 Response:
 
-[Example Ouptut CSV](https://github.com/AmericanRedCross/pcoder/tree/master/DocSupport/example_csv/output.csv)
+[Example Ouptut CSV](https://github.com/AmericanRedCross/pcoder/tree/master/DocSupport/example_csv/outputxy.csv)
+
+
+#####p-code Mode
+POST a Comma Separated Value (.csv) file containing p-codes to this service, and it will return the corresponding boundary geometry or boundary geometry centroid in the csv.
+Once uploaded, the service searches for the following columns:
+
+1) p-code - Use either pcode, pcodes, p-code or p-codes as the column name.
+
+Other columns pass through unaffected, and are included in the output.
+
+####Parameters
+- **csvupload** - required. The CSV file being posted should be passed using this parameter name
+- **format** - required. `geojson` or `csv`
+- **name** - required. "uploadcsvtopcode".  All endpoints require the name of the operation to be specified.
+
+####POST Example
+
+######Pass in list csv from HTML file picker, output format = csv
+
+[Example Input CSV](https://github.com/AmericanRedCross/pcoder/tree/master/DocSupport/example_csv/inputpcode.csv)
+
+
+    <html>
+        <head>
+           <title>PCoder Example</title>
+           <meta charset="utf-8">
+           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body>
+            <form action="https://geo.redcross.org/pcodes/services/geoprocessing/geoprocessing_operation" method="POST" enctype="multipart/form-data">
+               <input type="file" name="csvupload">
+               <input type="hidden" name="name" value="UploadCSVToPCode">
+               <input type="hidden" name="format" value="csv">
+               <button type="submit" class="btn">Submit</button>
+            </form>
+        </body>
+    </html>
+
+Response:
+
+[Example Ouptut CSV](https://github.com/AmericanRedCross/pcoder/tree/master/DocSupport/example_csv/outputpcode.csv)
+
+
+
+###<a name="GetPCodeStackByPCodeList"></a>GetPCodeStackByPCodeList
+This service expects a delimited list of p-codes to be passed in, and will return information and geometry (polygon or centroid) of corresponding administrative boundaries that touch those locations.
+
+####Parameters
+- **list** - required. An comma separated list of p-codes. (Example: GIN004001, SL, GIN004002, SLE0101, LBR01)
+- **geometryType** - optional.  `polygon` or `centroid`.  Default: `polygon`
+- **format** - required. `geojson` or `csv`
+- **name** - required. "getpcodestackbypcodelist".  All endpoints require the name of the operation to be specified.
+
+####GET Example
+
+######Pass in a comma-delimited list of pcodes, output format = geojson, centroid geometry
+PCodes are: GIN004001, SL, GIN004002, SLE0101, LBR01
+
+    https://geo.redcross.org/pcodes/services/geoprocessing/geoprocessing_operation?name=getpcodestackbypcodelist&list=GIN004001, SL, GIN004002, SLE0101, LBR01&geometryType=centroid&format=geojson
+
+Response:
+
+    {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "level": 2,
+            "name": "Kérouané",
+            "guid": "a176034b-06dd-4253-a742-b4407576d5af",
+            "pcode": "GIN004002"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -9.10114449791364,
+              9.26283889364522
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "level": 2,
+            "name": "Kankan",
+            "guid": "dff1921d-32d1-441c-aa9f-c36ff5aa6447",
+            "pcode": "GIN004001"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -9.10625776508324,
+              10.0597080873078
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "level": 2,
+            "name": "Kailahun",
+            "guid": "356df806-647c-46ac-a8dc-159ba50e94be",
+            "pcode": "SLE0101"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -10.6969980742175,
+              8.08508800701607
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "level": 1,
+            "name": "Bomi",
+            "guid": "736f68ef-dcd9-412b-a038-09ad95b0e668",
+            "pcode": "LBR01"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -10.815481809109,
+              6.69834157162017
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "level": 0,
+            "name": "Sierra Leone",
+            "guid": "d0360513-1308-4f96-908e-2b2d7420761a",
+            "pcode": "SL"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -11.7895132734613,
+              8.55878914011298
+            ]
+          }
+        }
+      ]
+    }
+
+
+
+####POST Example
+Using jQuery, here is an example of POSTing to this endpoint:
+
+    //define arguments
+    var args = {
+        format: 'geojson',
+        list: "GIN004001, SL, GIN004002, SLE0101, LBR01",
+        geometryType: "centroid",
+        name: "getpcodestackbypcodelist"
+    };
+
+    //jQuery POST
+    $.post('https://geo.redcross.org/pcodes/services/geoprocessing/geoprocessing_operation', args).done(function (data) {
+        //Callback on success
+        console.log(data);
+    })
