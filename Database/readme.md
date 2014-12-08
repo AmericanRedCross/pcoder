@@ -4,13 +4,13 @@ PCoder Database
 The PCoder database is a PostGreSQL/PostGIS instance running on an Amazon RDS instance.
 The tables are as follows:
 
-*gadm0
-*gadm1
-*gadm2
-*gadm3
-*gadm4
-*gadm5
-*gadmrollup
+* gadm0
+* gadm1
+* gadm2
+* gadm3
+* gadm4
+* gadm5
+* gadmrollup
 
 The underlying boundary dataset is [GADM](http://www.gadm.org), 2014 release.
 
@@ -25,7 +25,7 @@ Although GADM tables have up to level 5 geometries for some areas of the world, 
 The main modification that was made to the GADM tables was the addition of a ‘pcode’ column.
 
 
-##Updating the Database with-pcodes
+## Updating the Database with-pcodes
 
 GADM tables do not know about p-codes.  They must be added to the dataset for the current setup to work.
 
@@ -40,7 +40,7 @@ This table contains 1 row per ‘stack’ of nested administrative boundaries.  
 
 
 
-##Substituting old geometry with new geometry
+## Substituting old geometry with new geometry
 
 In the case of Guinea, we discovered that the boundaries around Conakry weren’t as up-to-date as the WFP Guinea dataset.
 
