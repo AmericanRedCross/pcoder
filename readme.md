@@ -5,7 +5,7 @@ Pcoder is a set of web services that allow for spatial querying of administrativ
 
 Currently, Guinea, Sierra Leone and Liberia contain p-codes, though there are gaps in coding depending on the country.
 
-* Guinea - Level 0,1 and 2
+* Guinea - Level 0,1, 2 and 3
 * Sierra Leone - Level 0, 1 and 2
 * Liberia - Level 0 and 1
 
@@ -16,7 +16,7 @@ The PCoder web services are custom geoprocessing endpoints used in conjunction w
 
 # Database
 
-Database docs are [here](https://github.com/AmericanRedCross/pcoder/tree/master/readme.md).
+Database docs are [here](https://github.com/AmericanRedCross/pcoder/tree/master/Database/readme.md).
 
 # Services
 
