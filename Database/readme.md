@@ -2,15 +2,15 @@ PCoder Database
 ========================
 
 The PCoder database is a PostGreSQL/PostGIS instance running on an Amazon RDS instance.
-The structure is as follows:
+The tables are as follows:
 
-gadm0
-gadm1
-gadm2
-gadm3
-gadm4
-gadm5
-gadmrollup
+*gadm0
+*gadm1
+*gadm2
+*gadm3
+*gadm4
+*gadm5
+*gadmrollup
 
 The underlying boundary dataset is [GADM](http://www.gadm.org), 2014 release.
 
