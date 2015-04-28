@@ -7,6 +7,8 @@ var pg = require('pg');
 var common = require("../../../common");
 var _ = require("underscore");
 
+var pcoderLibrary = require("../pcoderSettings.js");
+
 var operation = {};
 
 
@@ -48,19 +50,21 @@ operation.execute = flow.define(
       pcodeList.forEach(function(pcode){
 
 
-        var query0, query1, query2, query3;
+        var query0, query1, query2, query3, query4;
 
 
         //No subdistricts - exact matches only
         //if(subDistricts == false){
         //Find the exact match by using a UNION all thru each level.
-        query3 = "select DISTINCT ON (pcode{{level}}) 3 as level, name{{level}} as name,guid{{level}} as guid, pcode{{level}} as pcode {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("3");
+        query4 = "select DISTINCT ON (pcode{{level}}) 4 as level, name{{level}} as name,guid{{level}} as guid, pcode{{level}} as pcode {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("4");
+        query3 = "UNION ALL select DISTINCT ON (pcode{{level}}) 3 as level, name{{level}} as name,guid{{level}} as guid, pcode{{level}} as pcode {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("3");
         query2 = "UNION ALL select DISTINCT ON (pcode{{level}}) 2 as level, name{{level}},guid{{level}},pcode{{level}} {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("2");
         query1 = "UNION ALL select DISTINCT ON (pcode{{level}}) 1 as level, name{{level}},guid{{level}},pcode{{level}} {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("1");
         query0 = "UNION ALL select DISTINCT ON (pcode{{level}}) '0' as level, name{{level}},guid{{level}},pcode{{level}} {{geometry}} from gadmrollup where pcode{{level}} = {{list}};".split("{{level}}").join("0");
 
         if(geometryType == 'polygon'){
           //Geometry, replace the geometry placeholder with the geometry columns.
+          query4 = query4.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geometry').split("{{level}}").join("4");
           query3 = query3.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geometry').split("{{level}}").join("3");
           query2 = query2.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geometry').split("{{level}}").join("2");
           query1 = query1.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geometry').split("{{level}}").join("1");
@@ -72,6 +76,7 @@ operation.execute = flow.define(
         }else{
           //Return the centroid (point) geometry
           //Geometry, replace the geometry placeholder with the geometry columns.
+          query4 = query4.split('{{geometry}}').join(', ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("4");
           query3 = query3.split('{{geometry}}').join(', ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("3");
           query2 = query2.split('{{geometry}}').join(', ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("2");
           query1 = query1.split('{{geometry}}').join(', ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("1");
@@ -81,12 +86,12 @@ operation.execute = flow.define(
           if (this.args.format != "csv") operation.geom_columns = ['geom_centroid']; //List the expected geom columns that come back from this query, so the formatters know which geoms to convert to GeoJSON
         }
 
-        var query = [query3, query2, query1, query0].join(" ")
+        var query = [query4, query3, query2, query1, query0].join(" ")
 
         //Wrap incoming pcodes with single quotes for the SQL IN clause
         var sql = { text: query.split("{{list}}").join("'" + pcode + "'"), values: []};
 
-        common.executePgQuery(sql, this.MULTI(key));//Flow to next function when ALL are done.
+        pcoderLibrary.executePgQuery(sql, this.MULTI(key));//Flow to next function when ALL are done.
 
       }, this)
 

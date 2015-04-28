@@ -8,6 +8,7 @@ Currently, Guinea, Sierra Leone and Liberia contain p-codes, though there are ga
 * Guinea - Level 0,1, 2 and 3
 * Sierra Leone - Level 0, 1 and 2
 * Liberia - Level 0 and 1
+* Nepal - Levels 0 thru 4
 
 The underlying boundary dataset is [GADM](http://www.gadm.org), 2014 release.
 

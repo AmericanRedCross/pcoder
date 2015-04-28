@@ -7,6 +7,7 @@ var pg = require('pg');
 var common = require("../../../common");
 var csv = require('ya-csv');
 
+var pcoderLibrary = require("../pcoderSettings.js");
 
 
 var operation = {};
@@ -56,7 +57,7 @@ operation.execute = flow.define(
     reader.addListener('data', function(data) {
       //first time thru, grab column names.
       if(x == 0){
-         self.column_names = data;
+        self.column_names = data;
       }
       else{
         if(data[0]){
@@ -113,8 +114,8 @@ operation.execute = flow.define(
 
     if(self.lookupType == "xy"){
 
-      //Push the 3 new column names into the column_name list: pcode0, pcode1, pcode2
-      self.column_names.push('pcode0', 'pcode1', 'pcode2');
+      //Push the 5 new column names into the column_name list: pcode0, pcode1, pcode2, pcode3, pcode4
+      self.column_names.push('pcode0', 'pcode1', 'pcode2', 'pcode3', 'pcode4');
 
       this.csv_object.forEach(function (row, i) {
 
@@ -145,6 +146,17 @@ operation.execute = flow.define(
           row.push("");
         }
 
+        if(record && record.pcode3){
+          row.push(record.pcode3);
+        }else{
+          row.push("");
+        }
+
+        if(record && record.pcode4){
+          row.push(record.pcode4);
+        }else{
+          row.push("");
+        }
 
         if (self.args.format == "csv") {
           //Add row to output rows list
@@ -171,7 +183,7 @@ operation.execute = flow.define(
     }
     else if(self.lookupType == "pcode"){
 
-      //Push the 3 new column names into the column_name list: geometry, centroid
+      //Push the 2 new column names into the column_name list: geometry, centroid
       self.column_names.push('geometry', 'centroid');
 
       this.csv_object.forEach(function (row, i) {
@@ -246,49 +258,59 @@ operation.execute = flow.define(
 //Given a lat/lng in 4326, get the pcode
 operation.GetPCodeByXY = function(x,y, callback){
 
-  var query = "select name0,guid0,pcode0,name1,guid1,pcode1,name2,guid2,pcode2,name3,guid3,pcode3 from gadmrollup where ST_Intersects(ST_GeomFromText('POINT({{x}} {{y}})', 4326), geom3);";
-  var sql = { text: query.replace("{{x}}", x).replace("{{y}}", y), values: []};
+  var query = "select name0,guid0,pcode0,name1,guid1,pcode1,name2,guid2,pcode2,name3,guid3,pcode3,name4,guid4,pcode4 from gadmrollup where ST_Intersects(ST_GeomFromText('POINT({{x}} {{y}})', 4326), {{intersection_level}});";
 
-  common.executePgQuery(sql, function(err, result){
-    var stack = {};
+  //Recursive function to do the intersecting starting at level 5 and working its way up until a match is found.
+  var levels = [5,4,3,2,1,0]; //The GADM levels to search thru
+  var number_of_levels = levels.length - 1; //How many levels will we iterate over?
 
-    //Get the result and iterate over the results, adding the correct pcode as an output
-    if(result){
-      if(result.rows){
-         result.rows.forEach(function(item, idx){
-           //There should only be 1 item in rows array
-           stack = item;
-         })
-      }
+  (function tryXYIntersect() {
+    if (number_of_levels >= 0) {
+      //Update the level
+      var sql = { text: query.replace("{{x}}", x).replace("{{y}}", y).replace("{{intersection_level}}", "geom" + number_of_levels), values: []};
+
+
+      pcoderLibrary.executePgQuery(sql, function (error, results) {
+        if (!error && results.rows && results.rows.length > 0) {
+          callback(results.rows[0]);
+          number_of_levels = -1;
+          return;
+        }
+        number_of_levels --;
+        tryXYIntersect();
+      });
     }
+    else{
+      //we've run out of levels. Exit.
+      callback({ rows: [] });
+    }
+  }())
 
-    //Callback with either nothing, or the result row
-    callback(stack);
-
-  });
 };
 
 //Given a pcode, get the Geom and/or centroid as GeoJSON
 operation.GetGeomByPCode = function(pcode, callback){
 
-  var query0, query1, query2, query3;
+  var query0, query1, query2, query3, query4;
 
-  query3 = "select DISTINCT ON (pcode{{level}}) 3 as level, name{{level}} as name,guid{{level}} as guid, pcode{{level}} as pcode {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("3");
+  query4 = "select DISTINCT ON (pcode{{level}}) 4 as level, name{{level}} as name,guid{{level}} as guid, pcode{{level}} as pcode {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("4");
+  query3 = "UNION ALL select DISTINCT ON (pcode{{level}}) 3 as level, name{{level}} as name,guid{{level}} as guid, pcode{{level}} as pcode {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("3");
   query2 = "UNION ALL select DISTINCT ON (pcode{{level}}) 2 as level, name{{level}},guid{{level}},pcode{{level}} {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("2");
   query1 = "UNION ALL select DISTINCT ON (pcode{{level}}) 1 as level, name{{level}},guid{{level}},pcode{{level}} {{geometry}} from gadmrollup where pcode{{level}} = {{list}}".split("{{level}}").join("1");
   query0 = "UNION ALL select DISTINCT ON (pcode{{level}}) 0 as level, name{{level}},guid{{level}},pcode{{level}} {{geometry}} from gadmrollup where pcode{{level}} = {{list}};".split("{{level}}").join("0");
 
   //Geometry, replace the geometry placeholder with the geometry columns.
+  query4 = query4.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geom, ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("4");
   query3 = query3.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geom, ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("3");
   query2 = query2.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geom, ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("2");
   query1 = query1.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geom, ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("1");
   query0 = query0.split('{{geometry}}').join(', ST_AsGeoJSON(geom{{level}}) as geom, ST_AsGeoJSON(ST_Centroid(geom{{level}})) as geom_centroid').split("{{level}}").join("0");
 
-  var query = [query3, query2, query1, query0].join(" ");
+  var query = [query4, query3, query2, query1, query0].join(" ");
 
   var sql = { text: query.split("{{list}}").join("'" + pcode + "'"), values: []};
 
-  common.executePgQuery(sql, function(err, result){
+  pcoderLibrary.executePgQuery(sql, function(err, result){
     var stack = {};
 
     //Get the result and iterate over the results, adding the correct geometries as an output
@@ -314,8 +336,8 @@ operation.isInputValid = function(input) {
     for (var key in input) {
       if (input.hasOwnProperty(key)) {
         if (input[key].required && (!input[key].value || input[key].value.length == 0)) {
-            //Required but not present.
-            return false;
+          //Required but not present.
+          return false;
         }
       }
     }

@@ -21,6 +21,7 @@ Although GADM tables have up to level 5 geometries for some areas of the world, 
 * Guinea - Level 0,1,2 and 3
 * Sierra Leone - Level 0, 1 and 2
 * Liberia - Level 0 and 1
+* Nepal - Levels 0 thru 4
 
 The main modification that was made to the GADM tables was the addition of a ‘pcode’ column.
 
